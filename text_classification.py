@@ -2,7 +2,7 @@ from utils.helper import vanilla_tfidf, bigrams_tfidf, vanilla_flair
 import pandas as pd
 from pathlib import Path
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from numpy import mean, std
 from multiprocessing import freeze_support
 
@@ -33,6 +33,8 @@ if __name__ == '__main__':
         "bigrams_tfidf": [],
         "vanilla_flair": [],
     }
+
+    # Train classical models with KFold validation
     for train_index, valid_index in skf.split(df["text"], df["target"]):
         # print("TRAIN:", train_index, "TEST:", valid_index)
         X_train = df.loc[train_index, "text"]
@@ -42,7 +44,10 @@ if __name__ == '__main__':
 
         scores["vanilla_tfidf_with_sgd"].append(vanilla_tfidf(X_train, X_valid, y_train, y_valid))
         scores["bigrams_tfidf"].append(bigrams_tfidf(X_train, X_valid, y_train, y_valid))
-        scores["vanilla_flair"].append(vanilla_flair(X_train, X_valid, y_train, y_valid))
 
     for key, value in scores.items():
         print(f"Approach: {key}. Mean F1 score {mean(value):0.3f} with std {std(value):0.4f}")
+
+
+    X_train, X_check, y_train, y_check = train_test_split(df["text"], df["target"], test_size=0.4, random_state=42, stratify=df["target"])
+    X_valid, X_holdout, y_valid, y_holdout = train_test_split(X_check, y_check, test_size=0.5, random_state=42, stratify=y_check)

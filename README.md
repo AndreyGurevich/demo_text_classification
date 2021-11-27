@@ -16,6 +16,8 @@ We can split data as 60%/20%/20% as train/validation/holdout. But dataset is rat
 
 Another option is stratified K-Fold splitting. We will train several model and evaluate them. So we will get scores on all the data. If scores on different subset will have low deviation, than our trained model are quite robust on full dataset.
 
+But we will use 60%/20%/20% approach with DL model just because this is faster to run and this is a demo task.
+
 ## Models
 ### vanilla_tfidf_with_sgd
 TFIDF vectorization and Stochastic Gradient Descent with default parameters from scikit-learn package
