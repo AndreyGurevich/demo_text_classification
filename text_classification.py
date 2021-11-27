@@ -13,18 +13,16 @@ if __name__ == '__main__':
     df = pd.read_csv(Path(".") / "data" / "spam.csv",
                      names=["label", "text"],
                      header=0,
-                     usecols=[0, 1], # we need only two columns
+                     usecols=[0, 1],  # we need only two columns
                      encoding="ISO-8859-1",
                      on_bad_lines="warn")
-    print(df.head())
+    # print(df.head())
     print(df["label"].value_counts())  # Check class balance: 4825 vs 747. Not bad, but slightly unbalanced
 
     assert df.loc[0, "label"] == "ham", "Something wrong with the datasource"
 
-
     # Let's do target encoding
     df["target"] = le.fit_transform(df["label"])
-
 
     # Use KFold because dataset is small and Stratified because it's unbalanced
     skf = StratifiedKFold(n_splits=5)
@@ -45,9 +43,26 @@ if __name__ == '__main__':
         scores["vanilla_tfidf_with_sgd"].append(vanilla_tfidf(X_train, X_valid, y_train, y_valid))
         scores["bigrams_tfidf"].append(bigrams_tfidf(X_train, X_valid, y_train, y_valid))
 
+
+    # Let's do 60/20/20 splitting
+    # We can use eval_on_train_fraction option of trainer.train() method, but will do splitting manually to save
+    # compatibility with possible additional frameworks (still looks like a little bit overengineering, but let it be).
+    df = df.sample(frac=0.05)
+    X_train, X_check, y_train, y_check = train_test_split(df["text"],
+                                                          df["target"],
+                                                          test_size=0.4,
+                                                          random_state=42,
+                                                          stratify=df["target"]
+                                                          )
+    X_valid, X_holdout, y_valid, y_holdout = train_test_split(X_check,
+                                                              y_check,
+                                                              test_size=0.5,
+                                                              random_state=42,
+                                                              stratify=y_check
+                                                              )
+
+    vanilla_flair_score = vanilla_flair(X_train, y_train, X_valid, y_valid, X_holdout, y_holdout, 1)
+    scores["vanilla_flair"] = vanilla_flair_score
+
     for key, value in scores.items():
-        print(f"Approach: {key}. Mean F1 score {mean(value):0.3f} with std {std(value):0.4f}")
-
-
-    X_train, X_check, y_train, y_check = train_test_split(df["text"], df["target"], test_size=0.4, random_state=42, stratify=df["target"])
-    X_valid, X_holdout, y_valid, y_holdout = train_test_split(X_check, y_check, test_size=0.5, random_state=42, stratify=y_check)
+        print(f"Method: {key}. Mean F1 score {mean(value):0.3f} with std {std(value):0.4f}")

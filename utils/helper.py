@@ -38,14 +38,13 @@ def bigrams_tfidf(x_train, x_valid, y_train, y_valid):
                                  )  # this is default parameters, just want them to be visible
     x_train_vectored = vectorizer.fit_transform(x_train)  # Fit on train data only
     x_valid_vectored = vectorizer.transform(x_valid)
-    print(x_train_vectored.shape)
     sgd = SGDClassifier(random_state=42)
     sgd.fit(x_train_vectored, y_train)
     score = f1_score(y_true=y_valid, y_pred=sgd.predict(x_valid_vectored))
     return score
 
 
-def prepare_temp_files_for_flair(x_train, x_valid, y_train, y_valid):
+def prepare_temp_files_for_flair(x_train, x_valid, y_train, y_valid, x_holdout, y_holdout):
     # We should write dataset into files with format:
     # __label__<class_1> <text>
     # __label__<class_2> <text>
@@ -54,17 +53,21 @@ def prepare_temp_files_for_flair(x_train, x_valid, y_train, y_valid):
         for text, label in zip(list(x_train), list(y_train)):
             f.write(f"__label__{label} {text}\n")
 
-    with open(tempdir / "valid.txt", "w", newline="\n", encoding="utf-8") as f:
+    with open(tempdir / "dev.txt", "w", newline="\n", encoding="utf-8") as f:
         for text, label in zip(list(x_valid), list(y_valid)):
+            f.write(f"__label__{label} {text}\n")
+
+    with open(tempdir / "test.txt", "w", newline="\n", encoding="utf-8") as f:
+        for text, label in zip(list(x_holdout), list(y_holdout)):
             f.write(f"__label__{label} {text}\n")
     return None
 
 
-def vanilla_flair(x_train, x_valid, y_train, y_valid):
-    prepare_temp_files_for_flair(x_train, x_valid, y_train, y_valid)
+def vanilla_flair(x_train, y_train, x_valid, y_valid, x_holdout, y_holdout, max_epochs):
+    prepare_temp_files_for_flair(x_train, x_valid, y_train, y_valid, x_holdout, y_holdout)
     corpus = ClassificationCorpus(tempdir,
-                                  test_file="valid.txt",
-                                  # dev_file="dev.txt",
+                                  test_file="test.txt",
+                                  dev_file="dev.txt",
                                   train_file="train.txt",
                                   label_type="topic",
                                   )
@@ -73,4 +76,7 @@ def vanilla_flair(x_train, x_valid, y_train, y_valid):
                                 multi_label=False,
                                 label_type="topic")
     trainer = ModelTrainer(classifier, corpus)
-    trainer.train(tempdir, max_epochs=3)
+    score = trainer.train(tempdir,
+                  max_epochs=max_epochs,
+                  num_workers=4)
+    return score["test_score"]
