@@ -8,6 +8,9 @@ git clone git@github.com:AndreyGurevich/demo_text_classification.git
 cd demo_text_classification
 conda create --name demo_text_classification python==3.8
 conda activate demo_text_classification
+```
+If you want to use GPU, install Pytorch with GPU support
+```
 pip install -r requirements.txt
 python text_classification.py
 ```
