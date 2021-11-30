@@ -40,7 +40,7 @@ if __name__ == '__main__':
         "TFIDF with SGD, all parameter by default": [],
         "TFIDF with SGD, tuned by intuition": [],
         # "TFIDF with SGD, tuned by optuna": [],
-        # "vanilla_flair": [],
+        "Flair with default parameter": [],
     }
 
     # Train classical models with KFold validation
@@ -73,8 +73,8 @@ if __name__ == '__main__':
                                                               random_state=42,
                                                               stratify=y_check
                                                               )
-    # vanilla_flair_score = vanilla_flair(X_train, y_train, X_valid, y_valid, X_holdout, y_holdout, max_epochs=1)
-    # scores["vanilla_flair"] = vanilla_flair_score
+    vanilla_flair_score = vanilla_flair(X_train, y_train, X_valid, y_valid, X_holdout, y_holdout, max_epochs=1)
+    scores["Flair with default parameter"] = [vanilla_flair_score]
 
     study = optuna.create_study(direction="maximize")
     # study.optimize(OptunaTFIDF(X_train, y_train, X_valid, y_valid), timeout=60)
@@ -82,6 +82,7 @@ if __name__ == '__main__':
                    timeout=None,
                    n_trials=3)
     print(study.best_trial)
+    scores["Flair, tuned by optuna"] = study.best_trial.values
 
     for key, value in scores.items():
         print(f"Method: {key}. Mean F1 score {mean(value):0.3f} with std {std(value):0.4f}")

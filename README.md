@@ -9,7 +9,7 @@ cd demo_text_classification
 conda create --name demo_text_classification python==3.8
 conda activate demo_text_classification
 ```
-If you want to use GPU, install Pytorch with GPU support
+If you want to use GPU, install Pytorch with GPU support first
 ```
 pip install -r requirements.txt
 python text_classification.py
@@ -21,15 +21,10 @@ Another option is stratified K-Fold splitting. We will train several model and e
 
 But we will use 60%/20%/20% approach with DL model just because this is faster to run and this is a demo task.
 
-## Models
-### vanilla_tfidf_with_sgd
-TFIDF vectorization and Stochastic Gradient Descent with default parameters from scikit-learn package
-
-No data preprocessing, no parameters tuning.
-
-### preprocessed_tfidf_with_sgd
-TFIDF vectorization and Stochastic Gradient Descent with default parameters from scikit-learn package
-
-No data preprocessing, no parameters tuning.
-
 ## Results
+|Model|Mean F1|Std F1|
+|---|---|---|
+|TFIDF with SGD, all parameter by default|0.946|0.0056|
+|TFIDF with SGD, tuned by intuition|0.951|0.0026|
+|Flair with default parameter|0.875|NA|
+|Flair, tuned by optuna|0.992|NA|
