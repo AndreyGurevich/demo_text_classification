@@ -39,8 +39,8 @@ if __name__ == '__main__':
     scores = {
         "TFIDF with SGD, all parameter by default": [],
         "TFIDF with SGD, tuned by intuition": [],
-        "TFIDF with SGD, tuned by optuna": [],
-        "vanilla_flair": [],
+        # "TFIDF with SGD, tuned by optuna": [],
+        # "vanilla_flair": [],
     }
 
     # Train classical models with KFold validation
