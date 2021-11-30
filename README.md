@@ -12,8 +12,12 @@ conda activate demo_text_classification
 If you want to use GPU, install Pytorch with GPU support first
 ```
 pip install -r requirements.txt
-python text_classification.py
+python text_classification.py 
 ```
+You can use keys `--frac` and `--max_epochs` to decrease execution time:
+
+`python text_classification.py --frac 0.1 --max_epochs 2`
+
 ## Methodology
 We can split data as 60%/20%/20% as train/validation/holdout. But dataset is rather small anf this type of splitting may lead to diverse subsets of text in splits. And this may lead to inaccurate scoring.
 
